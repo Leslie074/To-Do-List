@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ToDoList</title>
+    <link rel="stylesheet" href="styling/styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <div class="main-container">
+
+        <div class="heading">
+            <p>To-Do List</p>
+            <img width="28px" height="28px" src="images/writing.png" alt="book-icon">
+        </div>
+
+        <form class="text-container" method="post" action="/submit" autocomplete="off">
+            <input type="text" placeholder="Add your task" name="task" required>
+            <button type="submit">Add</button>
+        </form>
+
+        <% if (locals.set_of_tasks) { %>
+
+            <ul>
+                <% for( let i = 0; i < set_of_tasks.length; i++ ) { %>
+    
+                <form class="task">
+
+                        <label class="container">
+                            <input name="checkbox-btn" type="checkbox">
+                            <span class="checkmark"></span>
+                        </label>
+
+                        <li>
+                            <p> <%= set_of_tasks[i] %> </p>
+                        </li>
+
+                        <img class="delete-btn" width="28px" height="28px" src="images/cross.png" alt="delete-btn">
+
+                </form>    
+    
+                <% } %>
+             </ul>
+
+        <% } %>
+
+    </div>
+
+    <script>
+
+        //This is used to cancel the text present in (li p) when the checkbox is checked and remove when it is not checked.
+        var checkbox = document.querySelectorAll(".task input");
+        var task = document.querySelectorAll("li p");
+
+        for(let i = 0 ; i < checkbox.length ; i++){
+
+            checkbox[i].addEventListener("click" , (e) => {
+                if(task[i].style.textDecoration === "line-through"){
+                    task[i].style.textDecoration = "none";
+                }
+
+                else{
+                    task[i].style.textDecoration = "line-through";
+                }
+    
+            });
+        }
+        
+        // ALl the delete buttons are selected.
+        var delete_button = document.querySelectorAll(".delete-btn");
+
+        // Since, the querySelectorAll by default stores it in the nodelist which cannot be accessed. Therefore, we have to convert it into arrays.
+        var btn_array = Array.from(delete_button);
+
+        for(let i = 0 ; i < delete_button.length ; i++){
+
+            delete_button[i].addEventListener("click" , (event) => {
+
+                //It will remove the task from the frontend
+                if(event.target.tagName === "IMG"){
+                        event.target.parentElement.remove();
+                    }
+            
+                //index of the clicked button is collected
+                var index = btn_array.indexOf(delete_button[i]);
+                
+                //This will send the index collected to the backend
+                fetch("/update", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+
+                    body: JSON.stringify({
+                        selected_index : index
+                    }),
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+
+
+            });
+        }
+
+    </script>
+
+</body>
+</html>
