@@ -1,41 +1,107 @@
 import express from "express";
 import bodyParser from "body-parser";
+import mongoose from "mongoose";
 
 const app = express();
 const port = 3000;
 app.use(express.static("public"));
-var tasks = [];
+app.use(express.json());
+
+//Connecting Mongoose
+mongoose.connect('mongodb://127.0.0.1:27017/todolist' )        // It is a promise.
+.then(() =>  {                                                 // If the promise is successfull.
+    console.log("Connection is successfull!")
+})    
+.catch((err) => {                                              // If the promise fails.
+    console.log(err)
+}); 
 
 app.use(bodyParser.urlencoded({extended : true}));
 
-//This will load up the page.
+// Table Schema 
+const todoschema = new mongoose.Schema({
+    name : String,
+    checkbox_status : Boolean
+})
+
+//Table
+const Work = mongoose.model("Work" , todoschema)
+
+//This will load up the page with all the tasks.
 app.get("/" , (req,res) => {
-    res.render("index.ejs");
+
+    async function get_all_tasks(){
+
+        const result = await Work.find();
+ 
+        res.render("index.ejs" , {
+            set_of_tasks : result
+        })
+    }
+
+    get_all_tasks();
+
 });
 
-//This will add the task recieved from the frontend into the backend array.
+//This will add the task recieved from the frontend into the database.
 app.post("/submit" , (req,res) => {
 
-    var task = req.body["task"];
-    tasks.push(task);
+    const task_name = req.body["task"];
 
-    res.render("index.ejs" , {
-        set_of_tasks : tasks,
+    const task = new Work({
+        name : task_name,
+        checkbox_status : false
     });
 
+    task.save();
+
+    //after adding the task in the database, we will redirect to "/" route where it will show the newly added task.
+    res.redirect("/");
 });
 
-//This will remove the task from the backend array based on the index recieved from the frontend.
-app.post("/update" , (req,res) => { 
+//This will remove the task from the database based on the id recieved from the frontend.
+app.post("/update_task" , (req,res) => { 
 
-    const delete_index = req.body.selected_index;
-    tasks.splice(delete_index,1);
+    const delete_button_id = req.body.selected_deleted_button_id;
 
-    res.render("index.ejs");
+    async function delete_task(){
+        await Work.deleteOne({ _id : delete_button_id });
+    }
 
+    delete_task();
+
+    //after deleting the task in the database, we will redirect to "/" route where it will reflect the changes made.
+    res.redirect("/");
 });
 
-//This represents the port number on which the local server is hosted.
+//This will update the status of the checkbox
+app.post("/update_checkbox" , (req,res) => { 
+
+    const checkbox_id = req.body.selected_checkbox_id;
+    let status;
+
+    async function update_checkbox_status(){
+        
+        let record = await Work.findOne({_id : checkbox_id});
+        status = record["checkbox_status"];
+
+        if(status===false){
+            await Work.updateOne({ _id : checkbox_id}, { $set: {checkbox_status : true } });
+        }
+
+        else{
+            await Work.updateOne({ _id : checkbox_id}, { $set: {checkbox_status : false } });
+        }
+    }
+
+    update_checkbox_status();
+
+    //after deleting the task in the database, we will redirect to "/" route where it will reflect the changes made.
+    res.redirect("/");
+});
+
+
+//This will start the server and it will represent the port number on which the local server is hosted.
 app.listen(port , ()=>{
     console.log(`Listening at port ${port}`);
 });

@@ -28,21 +28,21 @@
             <ul>
                 <% for( let i = 0; i < set_of_tasks.length; i++ ) { %>
     
-                <form class="task">
+                <div class="task">
 
                         <label class="container">
-                            <input name="checkbox-btn" type="checkbox">
+                            <input name="checkbox-btn" type="checkbox" value= "<%= set_of_tasks[i]._id %>" <%= set_of_tasks[i].checkbox_status ? "checked" : "" %>>
                             <span class="checkmark"></span>
                         </label>
 
                         <li>
-                            <p> <%= set_of_tasks[i] %> </p>
+                            <p> <%= set_of_tasks[i].name %> </p>
                         </li>
 
-                        <img class="delete-btn" width="28px" height="28px" src="images/cross.png" alt="delete-btn">
+                        <img class="delete-btn"width="28px" height="28px" src="images/cross.png" alt="delete-btn" value= "<%= set_of_tasks[i]._id %>">
+                    
+                    </div>
 
-                </form>    
-    
                 <% } %>
              </ul>
 
@@ -51,61 +51,84 @@
     </div>
 
     <script>
-
-        //This is used to cancel the text present in (li p) when the checkbox is checked and remove when it is not checked.
+    
         var checkbox = document.querySelectorAll(".task input");
         var task = document.querySelectorAll("li p");
+
+        //When the page is loaded or refreshed, appropriate stlye should be applied based on the checkbox status
+        for(let i = 0 ; i < checkbox.length ; i++){
+
+            if(checkbox[i].checked === true){
+                task[i].style.textDecoration = "line-through"
+            }
+
+            else{
+                task[i].style.textDecoration = "none";
+            }
+        }
 
         for(let i = 0 ; i < checkbox.length ; i++){
 
             checkbox[i].addEventListener("click" , (e) => {
-                if(task[i].style.textDecoration === "line-through"){
-                    task[i].style.textDecoration = "none";
+
+                //When the checkbox is clicked, appropriate stlye should be applied based on the checkbox status.
+                if(checkbox[i].checked === true){
+                    task[i].style.textDecoration = "line-through"
                 }
 
                 else{
-                    task[i].style.textDecoration = "line-through";
+                    task[i].style.textDecoration = "none";
                 }
-    
+
+                //To get the id of the checkbox clicked
+                var checkbox_id = checkbox[i].getAttribute("value");  
+                
+                //Sending the id of the checkbox clicked to backend
+                fetch("/update_checkbox", {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+
+                        body: JSON.stringify({
+                            selected_checkbox_id : checkbox_id
+                        }),
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                    });
+
             });
         }
         
-        // ALl the delete buttons are selected.
         var delete_button = document.querySelectorAll(".delete-btn");
-
-        // Since, the querySelectorAll by default stores it in the nodelist which cannot be accessed. Therefore, we have to convert it into arrays.
-        var btn_array = Array.from(delete_button);
 
         for(let i = 0 ; i < delete_button.length ; i++){
 
-            delete_button[i].addEventListener("click" , (event) => {
+            delete_button[i].addEventListener("click" , () => {
 
-                //It will remove the task from the frontend
-                if(event.target.tagName === "IMG"){
-                        event.target.parentElement.remove();
-                    }
+                //This will remove the task from frontend when the cross button is clicked. Basically, we are targeting the cross button of that task and on clicking it we are removing the parent element ( div class="task" ) 
+                event.target.parentElement.remove();
             
-                //index of the clicked button is collected
-                var index = btn_array.indexOf(delete_button[i]);
-                
-                //This will send the index collected to the backend
-                fetch("/update", {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
+                //To get the id of the delete button clicked
+                var delete_button_id = delete_button[i].getAttribute("value");
 
-                    body: JSON.stringify({
-                        selected_index : index
-                    }),
+                //Sending the id of the delete button clicked to backend
+                fetch("/update_task", {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+
+                        body: JSON.stringify({
+                            selected_deleted_button_id : delete_button_id
+                        }),
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                    });
                 })
-                .catch(error => {
-                    console.error('Error:', error);
-                });
-
-
-            });
-        }
+        } 
 
     </script>
 
