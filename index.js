@@ -7,8 +7,10 @@ const port = 3000;
 app.use(express.static("public"));
 app.use(express.json());
 
+// mongodb://127.0.0.1:27017/todolist
+
 //Connecting Mongoose
-mongoose.connect('mongodb://127.0.0.1:27017/todolist' )        // It is a promise.
+mongoose.connect('mongodb+srv://admin-leslie:udemy1901@cluster0.yyxkwsd.mongodb.net/todolist')        // It is a promise.
 .then(() =>  {                                                 // If the promise is successfull.
     console.log("Connection is successfull!")
 })    
