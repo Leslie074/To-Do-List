@@ -167,7 +167,13 @@ li p{
   background-color: gainsboro;
 }
 
-@media (max-width : 480px) {
+@media (max-width : 460px) {
+
+  .text-container{
+    display: flex;
+    padding: 0px;
+    margin: 0px;
+  }
 
   .main-container{
     padding: 20px 30px 10px 30px;
