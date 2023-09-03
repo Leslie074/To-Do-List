@@ -167,7 +167,7 @@ li p{
   background-color: gainsboro;
 }
 
-@media (max-width : 460px) {
+@media (max-width : 480px) {
 
   .text-container{
     display: flex;
@@ -180,8 +180,8 @@ li p{
     margin: 0px 10px;
   }
 
-  /* .heading{
-    margin-bottom: 15px;
-} */
+  .heading{
+    margin-bottom: 20px;
+}
   
 }
