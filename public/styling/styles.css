@@ -176,7 +176,12 @@ li p{
   }
 
   .main-container{
-    padding: 20px 30px 10px 30px;
+    padding: 25px 25px 10px 25px;
+    margin: 0px 10px;
   }
+
+  /* .heading{
+    margin-bottom: 15px;
+} */
   
 }
